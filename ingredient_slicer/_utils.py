@@ -1158,42 +1158,33 @@ def _remove_parenthesis_from_str(ingredient: str) -> str:
 
 
 def _find_and_remove(string: str, pattern: re.Pattern) -> str:
-        """Find and remove all matches of a pattern from a string.
-        Args:
-            string (str): The string to search for matches in
-            pattern (re.Pattern): The pattern to search for in the string
-        Returns:
-            str: The modified string with all matches removed
-        """
-
-        pattern_iter = pattern.finditer(string)
-
-        offset = 0
-
-        for match in pattern_iter:
-            match_string    = match.group()
-            replacement_str = ""
-
-            # Get the start and end of the match and the modified start and end positions given the offset
-            start, end = match.start(), match.end()
-            modified_start = start + offset
-            modified_end = end + offset
-
-            # Construct the modified string with the replacement applied
-            string = string[:modified_start] + str(replacement_str) + string[modified_end:]
-            # self.standardized_ingredient = self.standardized_ingredient[:modified_start] + str(replacement_str) + self.standardized_ingredient[modified_end:]
-
-            # Update the offset for subsequent removals # TODO: this is always 0 because we're removing the match, probably just remove...
-            offset += len(str(replacement_str)) - (end - start)
-            # print(f"""
-            # Match string: {match_string}
-            # -> Match: {match_string} at positions {start}-{end}
-            # --> Modified start/end match positions: {modified_start}-{modified_end}
-            # ---> Modified string: {string}""")
+    """
+    Find and remove all matches of a pattern from a string.
+    
+    Args:
+        string (str): The string to search for matches in.
+        pattern (re.Pattern): The regex pattern to search for in the string.
         
-        string = string.strip()
+    Returns:
+        str: The modified string with all matches removed, maintaining accurate offset tracking for potential further text manipulations.
+    """
+    # Initialize offset to manage the shift in indices due to text modifications.
+    offset = 0
 
-        return string
+    # Collect all matches using finditer to process them in a single pass.
+    matches = list(pattern.finditer(string))
+    for match in matches:
+        # Calculate the start and end positions of each match, adjusted by the current offset.
+        start, end = match.start() + offset, match.end() + offset
+
+        # Update the string by removing matches.
+        string = string[:start] + string[end:]
+
+        # Adjust the offset for the next iteration to account for the removal of the current match.
+        offset -= (end - start)
+
+    # Strip the string of any leading or trailing whitespace that may have been affected by the removals.
+    return string.strip()
 
 def _find_and_replace_casual_quantities(ingredient: str) -> str:
     """
